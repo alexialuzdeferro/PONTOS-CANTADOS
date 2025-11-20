@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>GIRAS DE POMBAGIRAS - PONTOS</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css " />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700 ;900&family=UnifrakturMaguntia&family=Crimson+Text:wght@600&display=swap');
+
+    :root {
+      --vermelho-pomba: #8b0000;
+      --rosa-sangue: #ff004c;
+      --dourado-velho: #d4af37;
+      --preto-veludo: #0a030b;
+      --cinza-fumaca: #2b1a23;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: linear-gradient(135deg, #0a030b, #1a000d, #2e0000);
+      color: #fff;
+      font-family: 'Crimson Text', serif;
+      overflow-x: hidden;
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* Pétalas caindo (animadas via JS) */
+    .petal {
+      position: absolute;
+      pointer-events: none;
+      opacity: 0.7;
+      z-index: 10;
+    }
+
+    /* Cabeçalho com aura */
+    header {
+      text-align: center;
+      padding: 35px 15px;
+      background: linear-gradient(to bottom, rgba(139, 0, 0, 0.9), rgba(100, 0, 0, 0.7));
+      position: relative;
+      box-shadow: 0 0 30px rgba(255, 0, 77, 0.5);
+      border-bottom: 3px solid var(--dourado-velho);
+    }
+
+    h1 {
+      font-family: 'Cinzel', serif;
+      font-size: 3.8em;
+      margin: 0;
+      letter-spacing: 3px;
+      text-shadow: 0 0 20px rgba(255, 0, 77, 0.8),
+                   0 0 40px rgba(212, 175, 55, 0.4);
+      color: var(--dourado-velho);
+    }
+
+    .subtitle {
+      font-family: 'UnifrakturMaguntia', cursive;
+      font-size: 1.8em;
+      color: var(--rosa-sangue);
+      margin-top: 10px;
+      text-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
+    }
+
+    .ritual-note {
+      font-size: 1.1em;
+      margin-top: 12px;
+      color: #ff99cc;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* Botão de oferenda */
+    .offering-btn {
+      background: linear-gradient(45deg, var(--vermelho-pomba), #6a0000);
+      color: white;
+      border: 2px solid var(--dourado-velho);
+      padding: 12px 30px;
+      font-size: 1.2em;
+      font-family: 'Cinzel', serif;
+      margin: 20px auto 30px;
+      cursor: pointer;
+      border-radius: 50px;
+      box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
+      transition: all 0.4s;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .offering-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 25px rgba(255, 0, 77, 0.7);
+      background: linear-gradient(45deg, #ff004c, #d4003c);
+    }
+
+    /* Playlist */
+    .playlist {
+      max-width: 900px;
+      margin: 20px auto;
+      padding: 5px 15px;
+    }
+
+    .track {
+      background: rgba(20, 5, 15, 0.85);
+      margin: 20px 10px;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 6px 20px rgba(139, 0, 0, 0.4);
+      transition: all 0.5s ease;
+      border: 1px solid rgba(212, 175, 55, 0.2);
+      position: relative;
+    }
+    .track::before {
+      content: "🌹";
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      font-size: 1.4em;
+      opacity: 0.8;
+    }
+    .track:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(255, 0, 77, 0.5),
+                  0 0 20px rgba(212, 175, 55, 0.3);
+      background: rgba(30, 8, 20, 0.9);
+    }
+
+    .track iframe {
+      width: 100%;
+      height: 200px;
+      border: none;
+      display: block;
+    }
+
+    .track-title {
+      padding: 16px 20px 16px 40px;
+      background: linear-gradient(to right, var(--vermelho-pomba), #a00000);
+      font-size: 1.4em;
+      text-align: center;
+      color: #ffebf0;
+      font-family: 'Cinzel', serif;
+      letter-spacing: 1px;
+      text-shadow: 1px 1px 3px #000;
+      border-top: 2px solid var(--dourado-velho);
+    }
+
+    /* Visualizador: chamas dançantes */
+    #visualizer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 140px;
+      background: linear-gradient(to top, rgba(10, 3, 11, 0.95), transparent);
+      z-index: 1000;
+      pointer-events: none;
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      padding: 0 10px;
+    }
+
+    .flame-bar {
+      width: 6px;
+      background: transparent;
+      margin: 0 1px;
+      border-radius: 4px 4px 0 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .flame {
+      width: 100%;
+      background: linear-gradient(to top,
+        var(--rosa-sangue),
+        #ff6699,
+        #ffccdd,
+        transparent
+      );
+      border-radius: 3px 3px 0 0;
+      animation: dance 1.8s infinite alternate ease-in-out;
+      transform-origin: bottom;
+    }
+
+    @keyframes dance {
+      0%, 100% { transform: scaleY(0.3) translateX(0); }
+      25% { transform: scaleY(0.8) translateX(-1px); }
+      50% { transform: scaleY(1) translateX(2px); }
+      75% { transform: scaleY(0.6) translateX(-1px); }
+    }
+
+    /* Rodapé com simbologia */
+    footer {
+      text-align: center;
+      padding: 35px 20px 60px;
+      color: #ff99cc;
+      font-size: 1.2em;
+      background: rgba(0, 0, 0, 0.3);
+      position: relative;
+    }
+
+    .symbols {
+      font-size: 2.2em;
+      margin: 15px 0;
+      letter-spacing: 12px;
+      color: var(--rosa-sangue);
+      text-shadow: 0 0 10px rgba(255, 0, 77, 0.5);
+    }
+
+    .rosa { 
+      color: var(--rosa-sangue); 
+      font-size: 1.6em;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.15); }
+    }
+
+    /* Contador de acesso discreto */
+    #contador-acessos {
+      position: fixed;
+      bottom: 10px;
+      right: 10px;
+      background: rgba(0, 0, 0, 0.5);
+      color: var(--dourado-velho);
+      padding: 5px 10px;
+      border-radius: 5px;
+      font-size: 0.8em;
+      font-family: 'Cinzel', serif;
+      z-index: 1001;
+      border: 1px solid rgba(212, 175, 55, 0.3);
+      opacity: 0.7;
+    }
+
+    /* Responsividade */
+    @media (max-width: 768px) {
+      h1 { font-size: 2.8em; }
+      .subtitle { font-size: 1.4em; }
+      .track iframe { height: 160px; }
+      .track-title { font-size: 1.2em; padding: 14px 15px 14px 35px; }
+      #visualizer { height: 100px; }
+      .flame-bar { width: 4px; margin: 0 0.5px; }
+      #contador-acessos { font-size: 0.7em; padding: 3px 7px; }
+    }
+
+    @media (max-width: 480px) {
+      h1 { font-size: 2.3em; }
+      .subtitle { font-size: 1.2em; }
+      .track iframe { height: 130px; }
+      .track-title { font-size: 1.1em; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>✨ GIRAS DE POMBAGIRAS - PONTOS ✨</h1>
+    <p class="subtitle">15 Pontos das Rainhas da Encruzilhada 🔥🌹</p>
+    <p class="ritual-note">
+      <i class="fas fa-candle-holder"></i> Ofereça com respeito. Ela escuta quando o coração é verdadeiro.
+    </p>
+    <button class="offering-btn" id="vela-btn">
+      <i class="fas fa-fire"></i> Acender 7 Velas para a Rainha
+    </button>
+  </header>
+
+  <div class="playlist" id="playlist">
+
+    <!-- Lista de faixas -->
+    <!-- (mantive os mesmos vídeos, mas agora com layout aprimorado) -->
+    <div class="track">
+      <div class="track-title">1. Oh Pombagira, Você é a Mais Bela Flor</div>
+      <iframe src="https://www.youtube.com/embed/RC_US2prJYs?enablejsapi=1 " allowfullscreen></iframe>
+    </div>
+
+    <div class="track">
+      <div class="track-title">2. Laroyê Pombagira — Ela Gira no Ar</div>
+      <iframe src="https://www.youtube.com/embed/10DwcvLoxrI?enablejsapi=1 " allowfullscreen></iframe>
+    </div>
+
+    <div class="track">
+      <div class="track-title">3. Moça Bonita, Moça Faceira</div>
+      <iframe src="https://www.youtube.com/embed/8cInvGRgB9w?enablejsapi=1 " allowfullscreen></iframe>
+    </div>
+
+    <div class="track">
+      <div class="track-title">4. Cemitério é Praça Linda — Padilha Mora Lá</div>
+      <iframe src="https://www.youtube.com/embed/jTjHs5og2rc?enablejsapi=1 " allowfullscreen></iframe>
+    </div>
+
+    <div class="track">
+      <div class="track-title">5. Pombagira é Mulher de Sete Maridos</div>
+      <iframe src="https://www.youtube.com/embed/bOfetOf9DaI?enablejsapi=1 " allowfullscreen></iframe>
+    </div>
+
+    <div class="track">
+      <div class="track-title">6. Malelê Malelê — As Pombagiras de Malelê</div>
+      <iframe src="https://www.youtube.com/embed/xlHDyGK9ouU?enablejsapi=1 " allowfullscreen></iframe>
+    </div>
+
+    <div class="track">
+      <div class="track-title">7. Umbanda — Sua Rainha Chegou</div>
+      <iframe src="https://www.youtube.com/embed/XSex5w1W2CY?enablejsapi=1 " allowfullscreen></iframe>
+    </div>
+
+    <div class="track">
+      <div class="track-title">8. Que Bela Noite, Que Lindo Luar</div>
+      <iframe src="https://www.youtube.com/embed/1mPMESy3-LY?enablejsapi=1 " allowfullscreen></iframe>
+    </div>
+
+    <div class="track">
+      <div class="track-title">9. Dona Pombagira, Leva Todo o Mal Pra Lá</div>
+      <iframe src="https://www.youtube.com/embed/Qayjpt6EcVQ?enablejsapi=1 " allowfullscreen></iframe>
+    </div>
+
+    <div class="track">
+      <div class="track-title">10. Pombagira Não Anda Sozinha</div>
+      <iframe src="https://www.youtube.com/embed/R1u7tp9XUrg?enablejsapi=1 " allowfullscreen></iframe>
+    </div>
+
+    <div class="track">
+      <div class="track-title">11. Arreda Homem, Que Aí Vem Mulher</div>
+      <iframe src="https://www.youtube.com/embed/oDMZ24BflCU?enablejsapi=1 " allowfullscreen></iframe>
+    </div>
+
+    <div class="track">
+      <div class="track-title">12. Pombagira da Praia — Saia que o Vento Balança</div>
+      <iframe src="https://www.youtube.com/embed/uC3Hxm3VCmc?enablejsapi=1 " allowfullscreen></iframe>
+    </div>
+
+    <div class="track">
+      <div class="track-title">13. Ela É Rainha do Cruzeiro</div>
+      <iframe src="https://www.youtube.com/embed/2t0-S0AW-9M?enablejsapi=1 " allowfullscreen></iframe>
+    </div>
+
+    <div class="track">
+      <div class="track-title">14. Pombagira Sete Encruzilhadas</div>
+      <iframe src="https://www.youtube.com/embed/dARZQgEwk1o?enablejsapi=1 " allowfullscreen></iframe>
+    </div>
+
+    <div class="track">
+      <div class="track-title">15. Ela Chegou — Saravá Pomba Gira!</div>
+      <iframe src="https://www.youtube.com/embed/fKBwjdaBzJc?enablejsapi=1 " allowfullscreen></iframe>
+    </div>
+
+  </div>
+
+  <!-- Visualizador de chamas -->
+  <div id="visualizer"></div>
+
+  <!-- Contador de acesso discreto -->
+  <div id="contador-acessos">Visitas: <span id="contador">0</span></div>
+
+  <footer>
+    <p class="symbols">🌹 🔥 ⚡ 🕯️ 🪞 🍾 🌙</p>
+    <p>Laroyê Pomba Gira! Que Ela abra seus caminhos,<br/> ilumine seus desejos e queime toda inveja.<br/>
+    Feito com axé, champanhe e pétalas de rosa vermelha <span class="rosa">♡</span></p>
+    <p><small>Respeite as tradições. A Rainha não brinca em serviço.</small></p>
+  </footer>
+
+  <script>
+    // === CONTADOR DE ACESSO DISCRETO ===
+    (function() {
+      const counterKey = 'pombagira_visits';
+      let visitCount = parseInt(localStorage.getItem(counterKey)) || 0;
+      visitCount++;
+      localStorage.setItem(counterKey, visitCount);
+      document.getElementById('contador').textContent = visitCount;
+    })();
+
+    // === 1. Criar o visualizador de chamas (dinâmico) ===
+    const visualizer = document.getElementById('visualizer');
+    const barCount = Math.floor(window.innerWidth / 8);
+    
+    for (let i = 0; i < barCount; i++) {
+      const bar = document.createElement('div');
+      bar.className = 'flame-bar';
+      const flame = document.createElement('div');
+      flame.className = 'flame';
+      flame.style.animationDelay = (Math.random() * 2) + 's';
+      flame.style.height = (Math.random() * 70 + 30) + 'px';
+      bar.appendChild(flame);
+      visualizer.appendChild(bar);
+    }
+
+    // === 2. Botão de "Acender Velas" ===
+    document.getElementById('vela-btn').addEventListener('click', function() {
+      // Efeito de chama no botão
+      this.innerHTML = '<i class="fas fa-fire"></i> Velas Acesas! Axé na Encruzilhada 🔥';
+      this.style.background = 'linear-gradient(45deg, #ff6600, #ffcc00)';
+      this.style.color = '#000';
+      
+      // Partículas de chama (simples)
+      createFlameParticles(15);
+      
+      // Som simbólico
+      const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFe3RvaV5aV1VTTklGQkA9OjY0MC0sKygnJSMeHRsZGBYVFBMRDw0MCwoJCAcGBQQDAgEA');
+      audio.volume = 0.3;
+      audio.play().catch(e => console.log("Áudio silencioso (autoplay blocked)"));
+    });
+
+    function createFlameParticles(count) {
+      for (let i = 0; i < count; i++) {
+        const flame = document.createElement('div');
+        flame.innerHTML = '🔥';
+        flame.style.position = 'fixed';
+        flame.style.fontSize = (Math.random() * 20 + 15) + 'px';
+        flame.style.left = Math.random() * 100 + 'vw';
+        flame.style.top = Math.random() * 30 + 'vh';
+        flame.style.opacity = '0.9';
+        flame.style.pointerEvents = 'none';
+        flame.style.zIndex = '5000';
+        document.body.appendChild(flame);
+
+        // Animação de subida e desaparecimento
+        const duration = 2 + Math.random() * 2;
+        flame.animate([
+          { top: flame.style.top, opacity: 0.9 },
+          { top: (parseFloat(flame.style.top) - 100) + 'px', opacity: 0 }
+        ], {
+          duration: duration * 1000,
+          easing: 'cubic-bezier(0.2, 0.8, 0.4, 1)'
+        });
+
+        setTimeout(() => flame.remove(), duration * 1000);
+      }
+    }
+
+    // === 3. Pétalas caindo suavemente (simbolismo) ===
+    function createPetal() {
+      const petal = document.createElement('div');
+      petal.classList.add('petal');
+      petal.textContent = '🌹';
+      petal.style.left = Math.random() * 100 + 'vw';
+      petal.style.top = '-20px';
+      petal.style.fontSize = (Math.random() * 20 + 12) + 'px';
+      petal.style.opacity = Math.random() * 0.5 + 0.4;
+      document.body.appendChild(petal);
+
+      const fallDuration = 10 + Math.random() * 15;
+      petal.animate([
+        { top: '-20px', transform: 'rotate(0deg)' },
+        { top: window.innerHeight + 'px', transform: 'rotate(' + (360 * (Math.random() > 0.5 ? 1 : -1)) + 'deg)' }
+      ], {
+        duration: fallDuration * 1000,
+        easing: 'cubic-bezier(0.2, 0.6, 0.4, 1)'
+      });
+
+      setTimeout(() => petal.remove(), fallDuration * 1000);
+    }
+
+    // Criar pétalas a cada 2~4 segundos
+    setInterval(createPetal, 2500 + Math.random() * 1500);
+
+    // === 4. Auto-scroll suave ao clicar em faixa (opcional) ===
+    document.querySelectorAll('.track').forEach((track, i) => {
+      track.addEventListener('click', () => {
+        // Destacar a faixa (opcional)
+        document.querySelectorAll('.track').forEach(t => t.style.transform = 'scale(1)');
+        track.style.transform = 'scale(1.02)';
+        setTimeout(() => track.style.transform = 'scale(1)', 800);
+      });
+    });
+
+  </script>
+
+</body>
+</html>
