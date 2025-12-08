@@ -224,22 +224,6 @@
       50% { transform: scale(1.15); }
     }
 
-    /* Contador de acesso discreto */
-    #contador-acessos {
-      position: fixed;
-      bottom: 10px;
-      right: 10px;
-      background: rgba(0, 0, 0, 0.5);
-      color: var(--dourado-velho);
-      padding: 5px 10px;
-      border-radius: 5px;
-      font-size: 0.8em;
-      font-family: 'Cinzel', serif;
-      z-index: 1001;
-      border: 1px solid rgba(212, 175, 55, 0.3);
-      opacity: 0.7;
-    }
-
     /* Responsividade */
     @media (max-width: 768px) {
       h1 { font-size: 2.8em; }
@@ -248,7 +232,6 @@
       .track-title { font-size: 1.2em; padding: 14px 15px 14px 35px; }
       #visualizer { height: 100px; }
       .flame-bar { width: 4px; margin: 0 0.5px; }
-      #contador-acessos { font-size: 0.7em; padding: 3px 7px; }
     }
 
     @media (max-width: 480px) {
@@ -274,7 +257,6 @@
 
   <div class="playlist" id="playlist">
 
-    <!-- Lista de faixas atualizada com 20 músicas -->
     <div class="track">
       <div class="track-title">1. Pomba Gira Rainha - Ponto Forte</div>
       <iframe id="player-1" src="https://www.youtube.com/embed/coi-tvUWwmc?enablejsapi=1" allowfullscreen></iframe>
@@ -377,11 +359,7 @@
 
   </div>
 
-  <!-- Visualizador de chamas -->
   <div id="visualizer"></div>
-
-  <!-- Contador de acesso discreto -->
-  <div id="contador-acessos">Visitas: <span id="contador">0</span></div>
 
   <footer>
     <p class="symbols">🌹 🔥 ⚡ 🕯️ 🪞 🍾 🌙</p>
@@ -390,19 +368,9 @@
     <p><small>Respeite as tradições. A Rainha não brinca em serviço.</small></p>
   </footer>
 
-  <!-- API do YouTube -->
   <script src="https://www.youtube.com/iframe_api"></script>
 
   <script>
-    // === CONTADOR DE ACESSO DISCRETO ===
-    (function() {
-      const counterKey = 'pombagira_visits';
-      let visitCount = parseInt(localStorage.getItem(counterKey)) || 0;
-      visitCount++;
-      localStorage.setItem(counterKey, visitCount);
-      document.getElementById('contador').textContent = visitCount;
-    })();
-
     // === VARIÁVEIS PARA CONTROLE DOS PLAYERS ===
     let players = [];
     let currentPlayingIndex = -1;
@@ -435,7 +403,7 @@
     // === 1. Criar o visualizador de chamas (dinâmico) ===
     const visualizer = document.getElementById('visualizer');
     const barCount = Math.floor(window.innerWidth / 8);
-    
+     
     for (let i = 0; i < barCount; i++) {
       const bar = document.createElement('div');
       bar.className = 'flame-bar';
